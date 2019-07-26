@@ -69,34 +69,34 @@ router.get("/getAll", (req, res) => {
 //@desc updates some content
 //@access public
 
-router.put("/updateItem", (req,res) => {
+router.put("/updateItem", (req, res) => {
 
-  const use = new item({
-    username: req.body.username,
-    content: req.body.content
-  });
+    const use = new item({
+        username: req.body.username,
+        content: req.body.content
+    });
 
-  item.findOne({ username: req.body.username })
-    .then(items => {
-      if (!items) {
-        errors.noItem = "User does not exist";
-        res.status(404).json(errors);
-      }
+    item.findOne({ username: req.body.username })
+        .then(items => {
+            if (!items) {
+                errors.noItem = "User does not exist";
+                res.status(404).json(errors);
+            } 
 
-      items
-      .remove()
-      .then(() => {
-        res.json({ success: "Content updated" });
-      })
-      .catch(err =>
-        res.status(404).json({ itemnotfound: "No User found" })
-      );
+            items
+                .remove()
+                .then(() => {
+                    res.json({ success: "Content updated" });
+                })
+                .catch(err =>
+                    res.status(404).json({ itemnotfound: "No User found" })
+                );
 
-      use.save().then(item => res.json(item))
-      .catch(err => console.log(err));
-    
-    })
-    .catch(err => res.status(404).json({ noItem: "User does not exist" }));
+            use.save().then(item => res.json(item))
+                .catch(err => console.log(err));
+
+        })
+        .catch(err => res.status(404).json({ noItem: "User does not exist" }));
 
 });
 
@@ -111,28 +111,29 @@ router.delete("/deleteUser", (req, res) => {
             if (!user) {
                 errors.username = "User does not exist";
                 res.status(404).send(errors);
-            } else {
-                bcrypt.compare(req.body.password, user.password)
-                    .then(isMatch => {
-                        if (!isMatch) {
-                            errors.password = "Password does not match username";
-                            res.status(404).send(errors);
-                        } else {
+            } else{
+            bcrypt.compare(req.body.password, user.password)
+                .then(isMatch => {
+                    if (!isMatch) {
+                        errors.password = "Password does not match username";
+                        res.status(404).send(errors);
+                    } else {
 
-                            item.remove().then(() => {
-                                res.send("Success");
-                            })
-                                .catch(err =>
-                                    res.status(404).json({ itemnotfound: "No item found" })
-                                );
-                        }
+                        item.remove().then(() => {
+                            res.send("Success");
+                        })
+                            .catch(err =>
+                                res.status(404).json({ itemnotfound: "No item found" })
+                            );
+                    }
 
-                    });
+                });
 
 
-            }
+
+        }
         });
-        }).catch(err => res.status(404).json({ noItem: "There is no item with that is" }));
+}).catch(err => res.status(404).json({ noItem: "There is no item with that is" }));
 });
 
 
