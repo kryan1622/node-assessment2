@@ -81,23 +81,23 @@ router.put("/updateItem", (req, res) => {
             if (!items) {
                 errors.noItem = "User does not exist";
                 res.status(404).json(errors);
-            } 
+            } else {
+                bcrypt.compare(req.body.password, user.password)
+                    .then(isMatch => {
+                        items.remove().then(() => {
+                            res.json({ success: "Content updated" });
+                        })
+                            .catch(err =>
+                                res.status(404).json({ itemnotfound: "No User found" })
+                            );
 
-            items
-                .remove()
-                .then(() => {
-                    res.json({ success: "Content updated" });
-                })
-                .catch(err =>
-                    res.status(404).json({ itemnotfound: "No User found" })
-                );
+                        use.save().then(item => res.json(item))
+                            .catch(err => console.log(err));
 
-            use.save().then(item => res.json(item))
-                .catch(err => console.log(err));
-
-        })
-        .catch(err => res.status(404).json({ noItem: "User does not exist" }));
-
+                    })
+                    .catch(err => res.status(404).json({ noItem: "User does not exist" }));
+            }
+        });
 });
 
 //@route DELETE content/delete
@@ -111,29 +111,29 @@ router.delete("/deleteUser", (req, res) => {
             if (!user) {
                 errors.username = "User does not exist";
                 res.status(404).send(errors);
-            } else{
-            bcrypt.compare(req.body.password, user.password)
-                .then(isMatch => {
-                    if (!isMatch) {
-                        errors.password = "Password does not match username";
-                        res.status(404).send(errors);
-                    } else {
+            } else {
+                bcrypt.compare(req.body.password, user.password)
+                    .then(isMatch => {
+                        if (!isMatch) {
+                            errors.password = "Password does not match username";
+                            res.status(404).send(errors);
+                        } else {
 
-                        item.remove().then(() => {
-                            res.send("Success");
-                        })
-                            .catch(err =>
-                                res.status(404).json({ itemnotfound: "No item found" })
-                            );
-                    }
+                            item.remove().then(() => {
+                                res.send("Success");
+                            })
+                                .catch(err =>
+                                    res.status(404).json({ itemnotfound: "No item found" })
+                                );
+                        }
 
-                });
+                    });
 
 
 
-        }
+            }
         });
-}).catch(err => res.status(404).json({ noItem: "There is no item with that is" }));
+    }).catch(err => res.status(404).json({ noItem: "There is no item with that is" }));
 });
 
 
