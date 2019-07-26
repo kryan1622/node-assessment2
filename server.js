@@ -13,7 +13,9 @@ app.use(bodyParser.urlencoded({ extended:false }));
 app.use(bodyParser.json());
 
 const users = require("./routes/users.js");
+const content = require("./routes/content.js");
 
 app.use("/users", users);
+app.use("/content", content);
 
 app.listen(port, () => console.log('server running on port 5000'));
