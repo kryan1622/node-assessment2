@@ -8,9 +8,9 @@ const Validation = require("../validation/validate.js")
 //desc creates new user
 //@access public
 
-router.post("/create", (req,res) => {
+router.post("/create", (req, res) => {
     const inValid = Validation(req.body);
-    if (!inValid.isValid){
+    if (!inValid.isValid) {
         return res.status(400).json(inValid.errors);
     }
     const use = new item({
@@ -19,27 +19,36 @@ router.post("/create", (req,res) => {
         password: req.body.password,
         password2: req.body.password2
     });
-            bcrypt.genSalt(10, (err,salt) => {
-        bcrypt.hash(req.body.password, salt, (err,hash) => {
-            if (err) throw err;
-            use.password = hash;
-            use.save().then(() => {
-            res.send('complete');
-           });
-    });
-            });
-    
-}); 
+    item.findOne({ username: req.body.username })
+        .then(user => {
+            if (user) {
+                errors.username = "User already exists!";
+                res.status(404).send(errors);
+            } else {
+                bcrypt.genSalt(10, (err, salt) => {
+                    bcrypt.hash(req.body.password, salt, (err, hash) => {
+                        if (err) throw err;
+                        use.password = hash;
+                        use.save().then(() => {
+                            res.send('complete');
+                        });
+                    });
+                });
+            }
+        }
+    )
+        .catch(err => res.status(404).send(err));
+});
 
 
 //@route GET users/get
 //@desc get users method created to test create methos was working as expected
 
-router.get("/get", (req,res) => {
-item.find({}, '-password -__v').then(items => {
-    res.json(items);
-})
-.catch(err => res.status(404).json({ noItems: "There are no items"}));
+router.get("/get", (req, res) => {
+    item.find({}, '-password -__v').then(items => {
+        res.json(items);
+    })
+        .catch(err => res.status(404).json({ noItems: "There are no items" }));
 });
 
 
