@@ -9,10 +9,10 @@ const Validation = require("../validation/validate.js")
 //@access public
 
 router.post("/create", (req, res) => {
-    const inValid = Validation(req.body);
-    if (!inValid.isValid) {
-        return res.status(400).json(inValid.errors);
-    }
+    // const inValid = Validation(req.body);
+    // if (!inValid.isValid) {
+    //     return res.status(400).json(inValid.errors);
+    // }
     const use = new item({
         username: req.body.username,
         email: req.body.email,
