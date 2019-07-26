@@ -47,7 +47,7 @@ router.post("/createContent", (req, res) => {
         })
         .catch(err => res.status(404).send(err));
 
-    
+
 });
 
 
@@ -69,17 +69,35 @@ router.get("/getAll", (req, res) => {
 //@desc updates some content
 //@access public
 
-router.put("/put", (req, res) => {
-    lodash.set(newArr, req.body.index, req.body.item);
-    res.send(newArr);
-});
+router.put("/updateItem", (req,res) => {
 
+  const use = new item({
+    username: req.body.username,
+    content: req.body.content
+  });
 
-router.put("/update", (req, res) => {
-    item.updateOne({ 'username': req.body.username },
-        { $set: { 'content': req.body.content } })
-        .then(() =>
-            res.send('updated'));
+  item.findOne({ username: req.body.username })
+    .then(items => {
+      if (!items) {
+        errors.noItem = "User does not exist";
+        res.status(404).json(errors);
+      }
+
+      items
+      .remove()
+      .then(() => {
+        res.json({ success: "Content updated" });
+      })
+      .catch(err =>
+        res.status(404).json({ itemnotfound: "No User found" })
+      );
+
+      use.save().then(item => res.json(item))
+      .catch(err => console.log(err));
+    
+    })
+    .catch(err => res.status(404).json({ noItem: "User does not exist" }));
+
 });
 
 //@route DELETE content/delete
@@ -88,24 +106,33 @@ router.put("/update", (req, res) => {
 
 router.delete("/deleteUser", (req, res) => {
     let errors = {};
-    const email = req.body.email;
-    const id = req.body._id;
-
-    item.findById(req.body._id).then(item => {
-        bcrypt.compare(req.body.email, item.email).then(isMatch => {
-            if (isMatch) {
-                item.remove().then(() => {
-                    res.send("sucess");
-                })
-                    .catch(err =>
-                        res.status(404).json({ itemnotfound: "No item found" })
-                    );
+    item.findOne({ username: req.body.username }).then(user => {
+        if (user => {
+            if (!user) {
+                errors.username = "User does not exist";
+                res.status(404).send(errors);
             } else {
-                errors.email = "Email Incorrect";
-                return res.status(400).json(errors)
+                bcrypt.compare(req.body.password, user.password)
+                    .then(isMatch => {
+                        if (!isMatch) {
+                            errors.password = "Password does not match username";
+                            res.status(404).send(errors);
+                        } else {
+
+                            item.remove().then(() => {
+                                res.send("Success");
+                            })
+                                .catch(err =>
+                                    res.status(404).json({ itemnotfound: "No item found" })
+                                );
+                        }
+
+                    });
+
+
             }
         });
-    }).catch(err => res.status(404).json({ noItem: "There is no item with that is" }));
+        }).catch(err => res.status(404).json({ noItem: "There is no item with that is" }));
 });
 
 
