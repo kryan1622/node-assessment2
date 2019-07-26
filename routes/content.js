@@ -13,33 +13,41 @@ const bcrypt = require("bcrypt");
 
 router.post("/createContent", (req, res) => {
     const errors = {};
-    // const inValid = Validation(req.body);
-    // if (!inValid.isValid) {
-    //     return res.status(400).json(inValid.errors);
-    // }
     const use = new item({
         username: req.body.username,
         content: req.body.content,
-        email: req.body.email
+        email: req.body.email,
+        password: req.body.password
     });
     item.findOne({ username: req.body.username })
         .then(user => {
             if (!user) {
-            errors.username = "User does not exists!";
+                errors.username = "User does not exists!";
                 res.status(404).send(errors);
             } else {
-                bcrypt.genSalt(10, (err, salt) => {
-                    bcrypt.hash(req.body.email, salt, (err, hash) => {
-                        if (err) throw err;
-                        use.email = hash;
-                        use.save().then(() => {
-                            res.send('complete');
-                        });
-                    });
-                });
+                bcrypt.compare(req.body.password, user.password)
+                    .then(isMatch => {
+                        if (isMatch) {
+                            bcrypt.genSalt(10, (err, salt) => {
+                                bcrypt.hash(req.body.email, salt, (err, hash) => {
+                                    if (err) throw err;
+                                    use.email = hash;
+                                    use.save().then(() => {
+                                        res.send('complete');
+                                    });
+                                });
+                            });
+                        } else {
+                            errors.password = "Password does not match username";
+                            res.status(404).send(errors);
+                        }
+                    })
             }
+
         })
-    .catch(err => res.status(404).send(err));
+        .catch(err => res.status(404).send(err));
+
+    
 });
 
 
@@ -48,9 +56,6 @@ router.post("/createContent", (req, res) => {
 //@desc gets content
 //@access public
 
-router.get("/get", (req, res) => {
-    res.send(newArr);
-});
 
 router.get("/getAll", (req, res) => {
     item.find({}, '-email -__v -password -password2')

@@ -9,10 +9,10 @@ const Validation = require("../validation/validate.js")
 //@access public
 
 router.post("/create", (req, res) => {
-    // const inValid = Validation(req.body);
-    // if (!inValid.isValid) {
-    //     return res.status(400).json(inValid.errors);
-    // }
+    const inValid = Validation(req.body);
+    if (!inValid.isValid) {
+        return res.status(400).json(inValid.errors);
+    }
     const use = new item({
         username: req.body.username,
         email: req.body.email,
@@ -45,7 +45,7 @@ router.post("/create", (req, res) => {
 //@desc get users method created to test create methos was working as expected
 
 router.get("/get", (req, res) => {
-    item.find({}, '-password -__v').then(items => {
+    item.find({}, '-password -__v -password2 -_id').then(items => {
         res.json(items);
     })
         .catch(err => res.status(404).json({ noItems: "There are no items" }));
