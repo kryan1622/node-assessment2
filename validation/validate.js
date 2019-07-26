@@ -14,6 +14,10 @@ module.exports = function validateCredentials(data){
     if (Validator.isEmpty(data.email)){
         errors.email = "Please enter a valid email";
     }
+
+    if (!Validator.equals(data.password, data.password2)){
+        errors.password2 = "Passwords do not match"
+    }
     return {
         errors,
         isValid: isEmpty(errors)
